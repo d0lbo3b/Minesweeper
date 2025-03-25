@@ -64,6 +64,8 @@ public class Field {
 			}
 			Console.WriteLine();
 		}
+
+		DrawGuide();
 	}
 
 	public void Randomize(int bombsPercentage, Vector2 cursorPosition) {
@@ -102,6 +104,11 @@ public class Field {
 		return false;
 	}
 
+	public void DrawGuide() {
+		Console.WriteLine();
+		Console.Write("WASD - cursor movement\nSPACE - open\nF - flag");
+	}
+	
 	public Cell GetCell(Vector2 position) {
 		return _field[(int)position.X, (int)position.Y];
 	}

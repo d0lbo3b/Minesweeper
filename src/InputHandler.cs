@@ -6,6 +6,11 @@ public class InputHandler {
 	private Field _field;
 	private Cursor _cursor;
 
+	private bool _hasEverOpened;
+	
+	public delegate void FirstOpenHandler();
+	public event FirstOpenHandler OnFirstOpen;
+	
 
 	#region Constructors
 
@@ -44,8 +49,12 @@ public class InputHandler {
 				break;
 			}
 			case ConsoleKey.Spacebar: {
+				if (!_hasEverOpened) {
+					OnFirstOpen?.Invoke();
+					_hasEverOpened = true;
+				}
 				_field.OpenCell(_cursor.GetPosition(), out var isBomb);
-
+				
 				hasCaughtBomb = isBomb;
 				return;
 			}
