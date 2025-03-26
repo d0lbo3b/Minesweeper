@@ -23,6 +23,14 @@ public class Field {
 		_cursor = cursor;
 	}
 
+	public Field(FieldData data, Vector2 padding, out Cursor cursor) {
+		Resize(new Vector2(data.Width, data.Height));
+
+		_padding = padding;
+		cursor = new Cursor(this, new Vector2(0, 0));
+		_cursor = cursor;
+	}
+	
 	public Field(Vector2 fieldSize, Vector2 padding, out Cursor cursor) {
 		Resize(fieldSize);
 		
@@ -152,7 +160,7 @@ public class Field {
 	}
 
 	public void DrawDefeatMessage() {
-		Console.WriteLine("Oops!");
+		Console.WriteLine("\nOops!");
 	}
 
 	public void OpenAllMines() {
@@ -168,7 +176,7 @@ public class Field {
 	}
 
 	public void DrawVictoryMessage() {
-		Console.WriteLine("You Win!");
+		Console.WriteLine("\nYou Win!");
 	}
 
 	public bool IsAllClear() {
