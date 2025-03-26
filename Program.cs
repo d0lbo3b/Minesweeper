@@ -51,11 +51,13 @@ internal class Program {
 				field.Draw();
 				inputHandler.HandleInput(Console.ReadKey(), out var hasCaughtBomb);
 			
-				var stopConditions = hasCaughtBomb || field.IsAllClear();
+				var stopConditions = hasCaughtBomb || field.Solved;
 				if (stopConditions) break;
 			} while (true);
 
-			if (field.IsAllClear()) {
+			field.Draw();
+			
+			if (field.Solved) {
 				field.DrawVictoryMessage();
 			}
 			else {

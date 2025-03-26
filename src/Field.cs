@@ -3,8 +3,10 @@
 namespace Minesweeper;
 
 public class Field {
+	public bool Solved => IsAllClear();
+
 	private Cell[,] _field;
-	private Cursor _cursor;
+	private readonly Cursor _cursor;
 	private Vector2 _fieldSize;
 	private Vector2 _padding;
 
@@ -73,24 +75,26 @@ public class Field {
 			Console.WriteLine();
 		}
 
-		DrawGuide();
+		if (!Solved) {
+			DrawGuide();
+		}
 	}
 
 	public void Randomize(int bombsPercentage, Vector2 cursorPosition) {
 		bombsPercentage = Math.Clamp(bombsPercentage, 0, 100);
-		_bombsCount = (int)(bombsPercentage*_fieldSize.X*_fieldSize.Y)/100;
 
 		Clear();
 		
 		for (var x = 0; x < _fieldSize.X; x++) {
 			for (var y = 0; y < _fieldSize.Y; y++) {
-				if (_bombsCount <= 0) return;
-				
 				var random = new Random();
 				var randomNumber = random.Next(0, 100);
-
-				if (randomNumber <= bombsPercentage && new Vector2(x, y) != cursorPosition) {
-					_field[x, y].SetMine();
+				
+				if (randomNumber <= bombsPercentage
+					&& new Vector2(x, y) != cursorPosition
+					&& !Cell.IsNeighbourOf(new Vector2(x, y), cursorPosition)) {
+					_bombsCount++;
+					GetCell(new Vector2(x, y)).SetMine();
 				}
 			}
 		}
@@ -153,7 +157,7 @@ public class Field {
 		return false;
 	}
 	
-	public void DrawPadding(int padding) {
+	private void DrawPadding(int padding) {
 		for (var i = 0; i < padding; i++) {
 			Console.Write(' ');
 		}
@@ -179,12 +183,13 @@ public class Field {
 		Console.WriteLine("\nYou Win!");
 	}
 
-	public bool IsAllClear() {
+	private bool IsAllClear() {
 		var clearedCellsCounter = (int)_fieldSize.X * (int)_fieldSize.Y;
 		
 		for (var x = 0; x < _fieldSize.X; x++) {
 			for (var y = 0; y < _fieldSize.Y; y++) {
-				if (_field[x, y].Type == CellType.Empty && _field[x, y].State == CellState.Opened) {
+				if (GetCell(new Vector2(x, y)).Type == CellType.Empty 
+					&& GetCell(new Vector2(x, y)).State == CellState.Opened) {
 					clearedCellsCounter--;
 				}
 			}

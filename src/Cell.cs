@@ -68,4 +68,16 @@ public class Cell {
 	public void SetFlagged() {
 		Flagged = Flagged == FlagState.Flagged ? FlagState.None : FlagState.Flagged;
 	}
+
+	public static bool IsNeighbourOf(Vector2 cellPosition, Vector2 nbourPosition) {
+		for (var dx = -1; dx < 1; dx++) {
+			for (var dy = -1; dy < 1; dy++) {
+				if (cellPosition + new Vector2(dx, dy) == nbourPosition) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
 }
