@@ -4,8 +4,8 @@ using Minesweeper.Utilities;
 namespace Minesweeper;
 
 internal static class Program {
-    private static readonly string _directory = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\k0nch\minesweeperData\";
-    private static readonly string _filePath = $"{_directory}preferences.json";
+    private static readonly string _directory = Path.Combine(Environment.CurrentDirectory, "data");
+    private static readonly string _filePath =  Path.Combine(_directory, "prefs.json");
 
 
     private static void Main() {
