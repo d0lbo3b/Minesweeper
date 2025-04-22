@@ -79,7 +79,7 @@ public class Field {
 
     private void DrawGuide() {
         Console.WriteLine();
-        Console.Write("WASD - cursor movement\nSPACE - open\nF - flag");
+        Console.WriteLine("WASD - cursor movement\nSPACE - open\nF - flag");
     }
 
     private void RevealEmptyArea(Vector2 initialPos) {

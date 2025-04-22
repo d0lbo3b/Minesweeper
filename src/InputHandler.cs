@@ -1,17 +1,22 @@
 ﻿using System.Numerics;
 
 namespace Minesweeper;
+public delegate void Handler();
 
 public class InputHandler {
 
-    public delegate void FirstOpenHandler();
     private Cursor _cursor = null!;
     private Field _field = null!;
 
     private bool _hasEverOpened;
-    public event FirstOpenHandler? OnFirstOpen;
+    public event Handler? OnFirstOpen;
+    public event Handler? OnBombCaught;
+    public event Handler? OnRestartPressed;
 
-    public void HandleInput(ConsoleKeyInfo keyInfo, out bool hasCaughtBomb) {
+    
+    public void HandleInput() {
+        var keyInfo = Console.ReadKey(true);
+        
         switch (keyInfo.Key) {
             #region Movement
 
@@ -44,19 +49,23 @@ public class InputHandler {
                     OnFirstOpen?.Invoke();
                     _hasEverOpened = true;
                 }
-                
-                hasCaughtBomb = false;
-                if (_field.TryOpenCell(_cursor.GetPosition(), out var isBomb)) {
-                    hasCaughtBomb = isBomb;
+
+                if (!_field.TryOpenCell(_cursor.GetPosition(), out var isBomb)) return;
+
+                if (isBomb) {
+                    OnBombCaught?.Invoke();
                 }
-                
+
                 return;
             }
 
+            case ConsoleKey.R: {
+                OnRestartPressed?.Invoke();
+                break;
+            }
+            
             #endregion
         }
-
-        hasCaughtBomb = false;
     }
 
     public void SetField(Field field) {

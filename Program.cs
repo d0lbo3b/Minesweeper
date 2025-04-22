@@ -9,66 +9,78 @@ internal static class Program {
 
 
     private static void Main() {
-        var answer = ConsoleKey.Q;
-        var fieldData = new FieldData();
+        var input = new ConsoleKeyInfo();
+        var shouldRestart = false;
 
-        if (JsonUtility.ReadSafe<FieldData?>(_filePath, ref fieldData)) {
-            Console.WriteLine("I've found your old preferences.\nWould you like to keep them? [Q - refuse] or [E - accept]\n");
-            fieldData?.Display();
-
-            answer = Console.ReadKey().Key;
-            Console.Clear();
-        }
-
-        if (answer == ConsoleKey.Q) {
-            Console.WriteLine("Welcome to Minesweeper!");
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey();
-            Console.Clear();
-
-            Console.Write("Enter Field width: ");
-            fieldData!.Width = Convert.ToInt32(Console.ReadLine());
-            Console.Clear();
-
-            Console.Write("Enter Field height: ");
-            fieldData.Height = Convert.ToInt32(Console.ReadLine());
-            Console.Clear();
-
-            Console.Write("Enter Mines Covering in %: ");
-            fieldData.MinesPercentage = Convert.ToInt32(Console.ReadLine());
-            Console.Clear();
-
-            GenerateJson(fieldData);
-        }
-        Console.CursorVisible = false;
-        
-        ConsoleKeyInfo input;
         do {
+            Console.Clear();
+            shouldRestart = false;
+            
+            var answer = ConsoleKey.Q;
+            var fieldData = new FieldData();
+
+            if (JsonUtility.ReadSafe<FieldData?>(_filePath, ref fieldData)) {
+                Console.WriteLine("I've found your old preferences.\nWould you like to keep them? [Q - refuse] or [E - accept]\n");
+                fieldData?.Display();
+
+                answer = Console.ReadKey().Key;
+                Console.Clear();
+            }
+
+            if (answer == ConsoleKey.Q) {
+                Console.WriteLine("Welcome to Minesweeper!");
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+                Console.Clear();
+
+                Console.Write("Enter Field width: ");
+                fieldData!.Width = Convert.ToInt32(Console.ReadLine());
+                Console.Clear();
+
+                Console.Write("Enter Field height: ");
+                fieldData.Height = Convert.ToInt32(Console.ReadLine());
+                Console.Clear();
+
+                Console.Write("Enter Mines Covering in %: ");
+                fieldData.MinesPercentage = Convert.ToInt32(Console.ReadLine());
+                Console.Clear();
+
+                GenerateJson(fieldData);
+            }
+            Console.CursorVisible = false;
+        
             var field = new Field(fieldData!, new Vector2(1, 1), out var cursor);
             var inputHandler = new InputHandler(field, cursor);
-
+            var bombCaught = false;
+            
             inputHandler.OnFirstOpen += () => { field.Randomize(fieldData!.MinesPercentage, cursor.GetPosition()); };
+            inputHandler.OnBombCaught += () => { bombCaught = true;};
+            inputHandler.OnRestartPressed += () => { shouldRestart = true; };
+            
             do {
                 field.Draw();
-                inputHandler.HandleInput(Console.ReadKey(true), out var hasCaughtBomb);
+                inputHandler.HandleInput();
 
-                var stopConditions = hasCaughtBomb || field.Solved;
-                if (stopConditions) break;
+                if (bombCaught
+                    || shouldRestart) {
+                    break;
+                }
             } while (true);
-
             field.Draw();
 
             if (field.Solved) {
                 field.DrawVictoryMessage();
-            } else {
-                field.OpenAllMines();
+            } else if (bombCaught) {
                 field.DrawDefeatMessage();
+            } else if (shouldRestart) {
+                continue;
             }
-
-            Console.WriteLine("Press R to restart");
+            field.OpenAllMines();
+            
+            Console.WriteLine("\nPress R to restart");
             Console.WriteLine("Press any other key to exit");
-            input = Console.ReadKey();
-        } while (input.Key == ConsoleKey.R);
+            input = Console.ReadKey(true);
+        } while (input.Key == ConsoleKey.R || shouldRestart);
     }
 
     private static void GenerateJson(FieldData fieldData) {
